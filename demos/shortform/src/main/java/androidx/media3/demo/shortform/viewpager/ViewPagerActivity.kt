@@ -17,7 +17,9 @@ package androidx.media3.demo.shortform.viewpager
 
 import android.os.Bundle
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.demo.shortform.MainActivity
 import androidx.media3.demo.shortform.MediaItemDatabase
 import androidx.media3.demo.shortform.R
@@ -30,7 +32,7 @@ class ViewPagerActivity : AppCompatActivity() {
   private var mediaItemDatabase = MediaItemDatabase()
 
   companion object {
-    private const val TAG = "ViewPagerActivity"
+    private const val TAG = "TEST"
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +50,8 @@ class ViewPagerActivity : AppCompatActivity() {
     viewPagerView.adapter = adapter
     onPageChangeCallback =
       object : ViewPager2.OnPageChangeCallback() {
-        override fun onPageSelected(position: Int) {
+        @OptIn(UnstableApi::class) override fun onPageSelected(position: Int) {
+          androidx.media3.common.util.Log.d("TEST","Starting onPageSelected numberOfPlayers :$numberOfPlayers position: $position")
           adapter.onPageSelected(position)
         }
       }

@@ -26,7 +26,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:use_controller="false"
-    app:resize_mode="fill"
+    app:resize_mode="fit"
     app:show_shuffle_button="true"
     app:show_subtitle_button="true"/>
 </LinearLayout>

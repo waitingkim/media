@@ -22,6 +22,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.demo.shortform.viewpager.ViewPagerActivity
 import java.lang.Integer.max
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     )
 
     findViewById<View>(R.id.view_pager_button).setOnClickListener {
+      Log.d("TEST", "Starting ViewPagerActivity numberOfPlayers :$numberOfPlayers")
       startActivity(
         Intent(this, ViewPagerActivity::class.java).putExtra(NUM_PLAYERS_EXTRA, numberOfPlayers)
       )

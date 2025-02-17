@@ -27,6 +27,7 @@ import androidx.media3.demo.shortform.MediaItemDatabase
 import androidx.media3.demo.shortform.PlayerPool
 import androidx.media3.demo.shortform.R
 import androidx.media3.exoplayer.DefaultLoadControl
+import androidx.media3.exoplayer.source.ConcatenatingMediaSource
 import androidx.media3.exoplayer.source.preload.DefaultPreloadManager
 import androidx.media3.exoplayer.source.preload.DefaultPreloadManager.Status.STAGE_LOADED_FOR_DURATION_MS
 import androidx.media3.exoplayer.source.preload.TargetPreloadStatusControl
@@ -46,11 +47,11 @@ class ViewPagerMediaAdapter(
   private val preloadControl: DefaultPreloadControl
 
   companion object {
-    private const val TAG = "ViewPagerMediaAdapter"
+    private const val TAG = "TEST"
     private const val LOAD_CONTROL_MIN_BUFFER_MS = 5_000
     private const val LOAD_CONTROL_MAX_BUFFER_MS = 20_000
     private const val LOAD_CONTROL_BUFFER_FOR_PLAYBACK_MS = 500
-    private const val MANAGED_ITEM_COUNT = 10
+    private const val MANAGED_ITEM_COUNT = 5
     private const val ITEM_ADD_REMOVE_COUNT = 4
   }
 
@@ -94,14 +95,27 @@ class ViewPagerMediaAdapter(
   }
 
   override fun onBindViewHolder(holder: ViewPagerMediaHolder, position: Int) {
-    val mediaItem = mediaItemDatabase.get(position)
     Log.d(TAG, "onBindViewHolder: Getting item at position $position")
-    var currentMediaSource = preloadManager.getMediaSource(mediaItem)
-    if (currentMediaSource == null) {
-      preloadManager.add(mediaItem, position)
-      currentMediaSource = preloadManager.getMediaSource(mediaItem)!!
-    }
-    holder.bindData(currentMediaSource)
+
+    preloadManager.add(mediaItemDatabase.get(0), 0)
+    var mediaSource0 = preloadManager.getMediaSource(mediaItemDatabase.get(0))
+
+    preloadManager.add(mediaItemDatabase.get(1), 1)
+    var mediaSource1 = preloadManager.getMediaSource(mediaItemDatabase.get(1))
+
+    preloadManager.add(mediaItemDatabase.get(2), 2)
+    var mediaSource2 = preloadManager.getMediaSource(mediaItemDatabase.get(2))
+
+    preloadManager.add(mediaItemDatabase.get(3), 3)
+    var mediaSource3 = preloadManager.getMediaSource(mediaItemDatabase.get(3))
+
+    preloadManager.add(mediaItemDatabase.get(4), 4)
+    var mediaSource4 = preloadManager.getMediaSource(mediaItemDatabase.get(4))
+
+    var concatenatingMediaSource = ConcatenatingMediaSource(mediaSource0!!, mediaSource1!!, mediaSource2!!, mediaSource3!!, mediaSource4!!)
+
+
+    holder.bindData(concatenatingMediaSource)
   }
 
   override fun onViewAttachedToWindow(holder: ViewPagerMediaHolder) {

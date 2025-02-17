@@ -84,6 +84,7 @@ dependencies {
     implementation project(modulePrefix + 'lib-exoplayer-dash')
     implementation project(modulePrefix + 'lib-exoplayer-hls')
     implementation project(modulePrefix + 'lib-ui')
+    implementation 'androidx.media3:media3-exoplayer-hls:1.5.1'
 
     testImplementation 'androidx.test:core:' + androidxTestCoreVersion
     testImplementation 'androidx.test.ext:junit:' + androidxTestJUnitVersion
