@@ -28,7 +28,7 @@ import androidx.viewpager2.widget.ViewPager2
 class ViewPagerActivity : AppCompatActivity() {
   private lateinit var viewPagerView: ViewPager2
   private lateinit var onPageChangeCallback: ViewPager2.OnPageChangeCallback
-  private var numberOfPlayers = 3
+  private var numberOfPlayers = 5
   private var mediaItemDatabase = MediaItemDatabase()
 
   companion object {

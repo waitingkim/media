@@ -28,6 +28,7 @@ import androidx.media3.demo.shortform.PlayerPool
 import androidx.media3.demo.shortform.R
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.source.ConcatenatingMediaSource
+import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.preload.DefaultPreloadManager
 import androidx.media3.exoplayer.source.preload.DefaultPreloadManager.Status.STAGE_LOADED_FOR_DURATION_MS
 import androidx.media3.exoplayer.source.preload.TargetPreloadStatusControl
@@ -36,166 +37,158 @@ import kotlin.math.abs
 
 @OptIn(UnstableApi::class)
 class ViewPagerMediaAdapter(
-  private val mediaItemDatabase: MediaItemDatabase,
-  numberOfPlayers: Int,
-  context: Context,
+    private val mediaItemDatabase: MediaItemDatabase,
+    numberOfPlayers: Int,
+    context: Context,
 ) : RecyclerView.Adapter<ViewPagerMediaHolder>() {
-  private val preloadManager: DefaultPreloadManager
-  private val currentMediaItemsAndIndexes: ArrayDeque<Pair<MediaItem, Int>> = ArrayDeque()
-  private var playerPool: PlayerPool
-  private val holderMap: MutableMap<Int, ViewPagerMediaHolder>
-  private val preloadControl: DefaultPreloadControl
+    private val preloadManager: DefaultPreloadManager
+    private val currentMediaItemsAndIndexes: ArrayDeque<Pair<MediaItem, Int>> = ArrayDeque()
+    private var playerPool: PlayerPool
+    private val holderMap: MutableMap<Int, ViewPagerMediaHolder>
+    private val preloadControl: DefaultPreloadControl
 
-  companion object {
-    private const val TAG = "TEST"
-    private const val LOAD_CONTROL_MIN_BUFFER_MS = 5_000
-    private const val LOAD_CONTROL_MAX_BUFFER_MS = 20_000
-    private const val LOAD_CONTROL_BUFFER_FOR_PLAYBACK_MS = 500
-    private const val MANAGED_ITEM_COUNT = 5
-    private const val ITEM_ADD_REMOVE_COUNT = 4
-  }
-
-  init {
-    val loadControl =
-      DefaultLoadControl.Builder()
-        .setBufferDurationsMs(
-          LOAD_CONTROL_MIN_BUFFER_MS,
-          LOAD_CONTROL_MAX_BUFFER_MS,
-          LOAD_CONTROL_BUFFER_FOR_PLAYBACK_MS,
-          DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS,
-        )
-        .setPrioritizeTimeOverSizeThresholds(true)
-        .build()
-    preloadControl = DefaultPreloadControl()
-    val preloadManagerBuilder =
-      DefaultPreloadManager.Builder(context.applicationContext, preloadControl)
-        .setLoadControl(loadControl)
-    playerPool = PlayerPool(numberOfPlayers, preloadManagerBuilder)
-    holderMap = mutableMapOf()
-    preloadManager = preloadManagerBuilder.build()
-    for (i in 0 until MANAGED_ITEM_COUNT) {
-      addMediaItem(index = i, isAddingToRightEnd = true)
+    companion object {
+        private const val TAG = "TEST"
+        private const val LOAD_CONTROL_MIN_BUFFER_MS = 5_000
+        private const val LOAD_CONTROL_MAX_BUFFER_MS = 20_000
+        private const val LOAD_CONTROL_BUFFER_FOR_PLAYBACK_MS = 500
+        private const val MANAGED_ITEM_COUNT = 5
+        private const val ITEM_ADD_REMOVE_COUNT = 4
     }
-    preloadManager.invalidate()
-  }
 
-  override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-    playerPool.destroyPlayers()
-    preloadManager.release()
-    holderMap.clear()
-    super.onDetachedFromRecyclerView(recyclerView)
-  }
-
-  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewPagerMediaHolder {
-    val view =
-      LayoutInflater.from(parent.context).inflate(R.layout.media_item_view_pager, parent, false)
-    val holder = ViewPagerMediaHolder(view, playerPool)
-    view.addOnAttachStateChangeListener(holder)
-    return holder
-  }
-
-  override fun onBindViewHolder(holder: ViewPagerMediaHolder, position: Int) {
-    Log.d(TAG, "onBindViewHolder: Getting item at position $position")
-
-    preloadManager.add(mediaItemDatabase.get(0), 0)
-    var mediaSource0 = preloadManager.getMediaSource(mediaItemDatabase.get(0))
-
-    preloadManager.add(mediaItemDatabase.get(1), 1)
-    var mediaSource1 = preloadManager.getMediaSource(mediaItemDatabase.get(1))
-
-    preloadManager.add(mediaItemDatabase.get(2), 2)
-    var mediaSource2 = preloadManager.getMediaSource(mediaItemDatabase.get(2))
-
-    preloadManager.add(mediaItemDatabase.get(3), 3)
-    var mediaSource3 = preloadManager.getMediaSource(mediaItemDatabase.get(3))
-
-    preloadManager.add(mediaItemDatabase.get(4), 4)
-    var mediaSource4 = preloadManager.getMediaSource(mediaItemDatabase.get(4))
-
-    var concatenatingMediaSource = ConcatenatingMediaSource(mediaSource0!!, mediaSource1!!, mediaSource2!!, mediaSource3!!, mediaSource4!!)
-
-
-    holder.bindData(concatenatingMediaSource)
-  }
-
-  override fun onViewAttachedToWindow(holder: ViewPagerMediaHolder) {
-    val holderBindingAdapterPosition = holder.bindingAdapterPosition
-    holderMap[holderBindingAdapterPosition] = holder
-
-    if (!currentMediaItemsAndIndexes.isEmpty()) {
-      val leftMostIndex = currentMediaItemsAndIndexes.first().second
-      val rightMostIndex = currentMediaItemsAndIndexes.last().second
-
-      if (rightMostIndex - holderBindingAdapterPosition <= 2) {
-        Log.d(TAG, "onViewAttachedToWindow: Approaching to the rightmost item")
-        for (i in 1 until ITEM_ADD_REMOVE_COUNT + 1) {
-          addMediaItem(index = rightMostIndex + i, isAddingToRightEnd = true)
-          removeMediaItem(isRemovingFromRightEnd = false)
+    init {
+        val loadControl =
+            DefaultLoadControl.Builder()
+                .setBufferDurationsMs(
+                    LOAD_CONTROL_MIN_BUFFER_MS,
+                    LOAD_CONTROL_MAX_BUFFER_MS,
+                    LOAD_CONTROL_BUFFER_FOR_PLAYBACK_MS,
+                    DefaultLoadControl.DEFAULT_BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS,
+                )
+                .setPrioritizeTimeOverSizeThresholds(true)
+                .build()
+        preloadControl = DefaultPreloadControl()
+        val preloadManagerBuilder =
+            DefaultPreloadManager.Builder(context.applicationContext, preloadControl)
+                .setLoadControl(loadControl)
+        playerPool = PlayerPool(numberOfPlayers, preloadManagerBuilder)
+        holderMap = mutableMapOf()
+        preloadManager = preloadManagerBuilder.build()
+        for (i in 0 until MANAGED_ITEM_COUNT) {
+            addMediaItem(index = i, isAddingToRightEnd = true)
         }
-      } else if (holderBindingAdapterPosition - leftMostIndex <= 2) {
-        Log.d(TAG, "onViewAttachedToWindow: Approaching to the leftmost item")
-        for (i in 1 until ITEM_ADD_REMOVE_COUNT + 1) {
-          addMediaItem(index = leftMostIndex - i, isAddingToRightEnd = false)
-          removeMediaItem(isRemovingFromRightEnd = true)
+        preloadManager.invalidate()
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        playerPool.destroyPlayers()
+        preloadManager.release()
+        holderMap.clear()
+        super.onDetachedFromRecyclerView(recyclerView)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewPagerMediaHolder {
+        val view =
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.media_item_view_pager, parent, false)
+        val holder = ViewPagerMediaHolder(view, playerPool)
+        view.addOnAttachStateChangeListener(holder)
+        return holder
+    }
+
+    override fun onBindViewHolder(holder: ViewPagerMediaHolder, position: Int) {
+        Log.d(TAG, "onBindViewHolder: Getting item at position $position")
+
+        var list: ArrayList<MediaSource> = arrayListOf();
+
+        for (i: Int in 0..mediaItemDatabase.size()) {
+            preloadManager.add(mediaItemDatabase.get(i), i)
+            var mediaSource0 = preloadManager.getMediaSource(mediaItemDatabase.get(i))
+            list.add(mediaSource0!!);
         }
-      }
+
+        var concatenatingMediaSource = ConcatenatingMediaSource(*list.toTypedArray())
+        holder.bindData(concatenatingMediaSource)
     }
-  }
 
-  override fun onViewDetachedFromWindow(holder: ViewPagerMediaHolder) {
-    holderMap.remove(holder.bindingAdapterPosition)
-  }
+    override fun onViewAttachedToWindow(holder: ViewPagerMediaHolder) {
+        val holderBindingAdapterPosition = holder.bindingAdapterPosition
+        holderMap[holderBindingAdapterPosition] = holder
 
-  override fun getItemCount(): Int {
-    // Effectively infinite scroll
-    return Int.MAX_VALUE
-  }
+        if (!currentMediaItemsAndIndexes.isEmpty()) {
+            val leftMostIndex = currentMediaItemsAndIndexes.first().second
+            val rightMostIndex = currentMediaItemsAndIndexes.last().second
 
-  fun onPageSelected(position: Int) {
-    holderMap[position]?.playIfPossible()
-    preloadControl.currentPlayingIndex = position
-    preloadManager.setCurrentPlayingIndex(position)
-    preloadManager.invalidate()
-  }
-
-  private fun addMediaItem(index: Int, isAddingToRightEnd: Boolean) {
-    if (index < 0) {
-      return
+            if (rightMostIndex - holderBindingAdapterPosition <= 2) {
+                Log.d(TAG, "onViewAttachedToWindow: Approaching to the rightmost item")
+                for (i in 1 until ITEM_ADD_REMOVE_COUNT + 1) {
+                    addMediaItem(index = rightMostIndex + i, isAddingToRightEnd = true)
+                    removeMediaItem(isRemovingFromRightEnd = false)
+                }
+            } else if (holderBindingAdapterPosition - leftMostIndex <= 2) {
+                Log.d(TAG, "onViewAttachedToWindow: Approaching to the leftmost item")
+                for (i in 1 until ITEM_ADD_REMOVE_COUNT + 1) {
+                    addMediaItem(index = leftMostIndex - i, isAddingToRightEnd = false)
+                    removeMediaItem(isRemovingFromRightEnd = true)
+                }
+            }
+        }
     }
-    Log.d(TAG, "addMediaItem: Adding item at index $index")
-    val mediaItem = mediaItemDatabase.get(index)
-    preloadManager.add(mediaItem, index)
-    if (isAddingToRightEnd) {
-      currentMediaItemsAndIndexes.addLast(Pair(mediaItem, index))
-    } else {
-      currentMediaItemsAndIndexes.addFirst(Pair(mediaItem, index))
-    }
-  }
 
-  private fun removeMediaItem(isRemovingFromRightEnd: Boolean) {
-    if (currentMediaItemsAndIndexes.size <= MANAGED_ITEM_COUNT) {
-      return
+    override fun onViewDetachedFromWindow(holder: ViewPagerMediaHolder) {
+        holderMap.remove(holder.bindingAdapterPosition)
     }
-    val itemAndIndex =
-      if (isRemovingFromRightEnd) {
-        currentMediaItemsAndIndexes.removeLast()
-      } else {
-        currentMediaItemsAndIndexes.removeFirst()
-      }
-    Log.d(TAG, "removeMediaItem: Removing item at index ${itemAndIndex.second}")
-    preloadManager.remove(itemAndIndex.first)
-  }
 
-  inner class DefaultPreloadControl(var currentPlayingIndex: Int = C.INDEX_UNSET) :
-    TargetPreloadStatusControl<Int> {
-
-    override fun getTargetPreloadStatus(rankingData: Int): DefaultPreloadManager.Status? {
-      if (abs(rankingData - currentPlayingIndex) == 2) {
-        return DefaultPreloadManager.Status(STAGE_LOADED_FOR_DURATION_MS, 500L)
-      } else if (abs(rankingData - currentPlayingIndex) == 1) {
-        return DefaultPreloadManager.Status(STAGE_LOADED_FOR_DURATION_MS, 1000L)
-      }
-      return null
+    override fun getItemCount(): Int {
+        // Effectively infinite scroll
+        return Int.MAX_VALUE
     }
-  }
+
+    fun onPageSelected(position: Int) {
+        holderMap[position]?.playIfPossible()
+        preloadControl.currentPlayingIndex = position
+        preloadManager.setCurrentPlayingIndex(position)
+        preloadManager.invalidate()
+    }
+
+    private fun addMediaItem(index: Int, isAddingToRightEnd: Boolean) {
+        if (index < 0) {
+            return
+        }
+        Log.d(TAG, "addMediaItem: Adding item at index $index")
+        val mediaItem = mediaItemDatabase.get(index)
+        preloadManager.add(mediaItem, index)
+        if (isAddingToRightEnd) {
+            currentMediaItemsAndIndexes.addLast(Pair(mediaItem, index))
+        } else {
+            currentMediaItemsAndIndexes.addFirst(Pair(mediaItem, index))
+        }
+    }
+
+    private fun removeMediaItem(isRemovingFromRightEnd: Boolean) {
+        if (currentMediaItemsAndIndexes.size <= MANAGED_ITEM_COUNT) {
+            return
+        }
+        val itemAndIndex =
+            if (isRemovingFromRightEnd) {
+                currentMediaItemsAndIndexes.removeLast()
+            } else {
+                currentMediaItemsAndIndexes.removeFirst()
+            }
+        Log.d(TAG, "removeMediaItem: Removing item at index ${itemAndIndex.second}")
+        preloadManager.remove(itemAndIndex.first)
+    }
+
+    inner class DefaultPreloadControl(var currentPlayingIndex: Int = C.INDEX_UNSET) :
+        TargetPreloadStatusControl<Int> {
+
+        override fun getTargetPreloadStatus(rankingData: Int): DefaultPreloadManager.Status? {
+            if (abs(rankingData - currentPlayingIndex) == 2) {
+                return DefaultPreloadManager.Status(STAGE_LOADED_FOR_DURATION_MS, 500L)
+            } else if (abs(rankingData - currentPlayingIndex) == 1) {
+                return DefaultPreloadManager.Status(STAGE_LOADED_FOR_DURATION_MS, 1000L)
+            }
+            return null
+        }
+    }
 }

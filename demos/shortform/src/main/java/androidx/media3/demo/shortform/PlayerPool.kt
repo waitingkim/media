@@ -18,14 +18,7 @@ package androidx.media3.demo.shortform
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.OptIn
-import androidx.media3.common.C.TRACK_TYPE_TEXT
 import androidx.media3.common.Player
-import androidx.media3.common.Player.EVENT_MEDIA_ITEM_TRANSITION
-import androidx.media3.common.Player.EVENT_MEDIA_METADATA_CHANGED
-import androidx.media3.common.Player.EVENT_PLAYBACK_STATE_CHANGED
-import androidx.media3.common.Player.EVENT_RENDERED_FIRST_FRAME
-import androidx.media3.common.Player.EVENT_TIMELINE_CHANGED
-import androidx.media3.common.Player.EVENT_TRACKS_CHANGED
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -129,26 +122,9 @@ class PlayerPool(private val numberOfPlayers: Int, preloadManagerBuilder: Builde
     override fun createPlayer(): ExoPlayer {
       val player = preloadManagerBuilder.buildExoPlayer()
       player.addAnalyticsListener(EventLogger("player-$playerCounter"))
-//      player.addListener(
-//
-//        object : Player.Listener {
-//          override fun onPlaybackStateChanged(playbackState: Int) {
-//            val stateString: String = when (playbackState) {
-//              ExoPlayer.STATE_IDLE -> "ExoPlayer.STATE_IDLE      -"
-//              ExoPlayer.STATE_BUFFERING -> "ExoPlayer.STATE_BUFFERING -"
-//              ExoPlayer.STATE_READY -> "ExoPlayer.STATE_READY     -"
-//              ExoPlayer.STATE_ENDED -> "ExoPlayer.STATE_ENDED     -"
-//              else -> "UNKNOWN_STATE             -"
-//            }
-//            Log.d("TEST", "changed state to $stateString current: ${player.contentPosition}")
-//          }
-//        }
-//      )
-
-
       playerCounter++
       Log.d("TEST", "createPlayer playerCounter: ${playerCounter}")
-      player.repeatMode = ExoPlayer.REPEAT_MODE_ALL
+      player.repeatMode = ExoPlayer.REPEAT_MODE_OFF
       Log.d("TEST", "createPlayer repeatMode: ${player.repeatMode}")
       return player
     }

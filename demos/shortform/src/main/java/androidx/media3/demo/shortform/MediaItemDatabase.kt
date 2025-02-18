@@ -16,20 +16,40 @@
 package androidx.media3.demo.shortform
 
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
 
 class MediaItemDatabase {
+    private var prefix = "http://125.159.54.5:1554/"
+    private var postfix = "?AdaptiveType=HLS"
+    private val mediaUris =
+        mutableListOf(
+            "${prefix}M49P100AGGL1500001.mpg$postfix",
+            "${prefix}M64OA0T8GGL1500001.mpg$postfix",
+            "${prefix}M64OA0THGGL1500001.mpg$postfix",
+            "${prefix}M64N30C9CNL1500001.mpg$postfix",
+            "${prefix}M64N30CBCNL1500001.mpg$postfix",
+            "${prefix}M64N30CFCNL1500001.mpg$postfix",
+            "${prefix}M64N30CLCNL1500001.mpg$postfix",
+            "${prefix}M64LA08TSGL1500001.mpg$postfix",
+            "${prefix}M64N30JKCNL1500001.mpg$postfix",
+            "${prefix}M64N30EECNL1500001.mpg$postfix"
 
-  private val mediaUris =
-    mutableListOf(
-      "https://storage.googleapis.com/exoplayer-test-media-0/shortform_1.mp4",
-      "https://storage.googleapis.com/exoplayer-test-media-0/shortform_2.mp4",
-      "https://storage.googleapis.com/exoplayer-test-media-0/shortform_3.mp4",
-      "https://storage.googleapis.com/exoplayer-test-media-0/shortform_4.mp4",
-      "https://storage.googleapis.com/exoplayer-test-media-0/shortform_6.mp4",
-    )
+//      "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8"
+//      "https://storage.googleapis.com/exoplayer-test-media-0/shortform_1.mp4",
+//      "https://storage.googleapis.com/exoplayer-test-media-0/shortform_2.mp4",
+//      "https://storage.googleapis.com/exoplayer-test-media-0/shortform_3.mp4",
+//      "https://storage.googleapis.com/exoplayer-test-media-0/shortform_4.mp4",
+//      "https://storage.googleapis.com/exoplayer-test-media-0/shortform_6.mp4",
+        )
 
-  fun get(index: Int): MediaItem {
-    val uri = mediaUris.get(index.mod(mediaUris.size))
-    return MediaItem.Builder().setUri(uri).setMediaId(index.toString()).build()
-  }
+    fun size(): Int {
+        return mediaUris.size;
+    }
+
+    fun get(index: Int): MediaItem {
+        val uri = mediaUris.get(index.mod(mediaUris.size))
+        return MediaItem.Builder().setUri(uri).setMediaId(index.toString())
+            .setMimeType(MimeTypes.APPLICATION_M3U8).build()
+    }
+
 }
